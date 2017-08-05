@@ -1,4 +1,4 @@
-# After_ParTIES
+# after_ParTIES
 
 This project contains software to analyze the relationships between IES (or other developmentally excised DNA) retention scores across multiple experimental conditions. A retention score correlation matrix is the final output.
 
