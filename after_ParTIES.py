@@ -1,4 +1,4 @@
-#!/usr/bin/env python3.6
+#!/usr/bin/env python
 
 #Author: Estienne C. Swart
 #Run after_ParTIES.py with the --help switch for usage information
@@ -9,6 +9,8 @@ from numpy import mean, std, array, arange, linspace
 import matplotlib.cm as cm
 import matplotlib.style as style
 import matplotlib.pyplot as plt
+import matplotlib.ticker as mticker
+from matplotlib.colors import LogNorm
 from scipy import stats
 from scipy.odr import ODR, Model, RealData
 from statsmodels.nonparametric.smoothers_lowess import lowess
@@ -72,7 +74,7 @@ def main(args, tick_font_size, label_font_size):
       if i > j:
         if len(x) > 0 and len(y) > 0:
           plt.subplot(n_subfigs, n_subfigs, z)
-          plt.hexbin(x, y, vmin=args.hexbin_vmin, vmax=args.hexbin_vmax, mincnt=1, bins='log', cmap=cm.viridis)
+          plt.hexbin(x, y, norm=LogNorm(vmin=args.hexbin_vmin, vmax=args.hexbin_vmax), mincnt=1, cmap=cm.viridis)
 
           max_max = max(max(x), max(y))
           xi = arange(0, max_max, 0.01)
@@ -102,23 +104,32 @@ def main(args, tick_font_size, label_font_size):
 
           ax = plt.gca()
           current_xticklabels = ax.get_xticks()
+          fixed_xticklabels = ["%.1f" % (round(current_label, 1)) for current_label in current_xticklabels]
           current_yticklabels = ax.get_yticks()
+          fixed_yticklabels = ["%.1f" % (round(current_label, 1)) for current_label in current_yticklabels]
+
+          ax.yaxis.set_major_locator(mticker.FixedLocator(list(current_yticklabels)))
+          ax.xaxis.set_major_locator(mticker.FixedLocator(list(current_xticklabels)))
+
           ax.set_xticklabels([])
           ax.set_yticklabels([])
+
 
           plt.tick_params(
           axis='both',
           which='both',
-          top='off',
-          right='off')
+          top=False,
+          right=False)
 
           if j == 0:
-            ax.set_yticklabels(current_yticklabels, fontsize=tick_font_size)
+            #ax.set_xticklabels(fixed_xticklabels, fontsize=tick_font_size)
+            ax.set_yticklabels(fixed_yticklabels, fontsize=tick_font_size)
+
             if args.show_axis_labels:
               ax.set_ylabel(experiment1, fontsize=label_font_size,
                 rotation=90, style=args.font_style)
           if i == n_subfigs -1:
-            ax.set_xticklabels(current_xticklabels, fontsize=tick_font_size, rotation=45)
+            ax.set_xticklabels(fixed_xticklabels, fontsize=tick_font_size, rotation=45)
             if args.show_axis_labels:
               ax.set_xlabel(experiment2, fontsize=label_font_size, style=args.font_style)
 
@@ -129,8 +140,8 @@ def main(args, tick_font_size, label_font_size):
         plt.tick_params(
         axis='both',
         which='both',
-        top='off', 
-        right='off')
+        top=False, 
+        right=False)
 
         if len(x) > 0: 
           plt.hist(x, bins=arange(0, 1, 0.025), linewidth=0.3, ec="white",
@@ -142,23 +153,33 @@ def main(args, tick_font_size, label_font_size):
 
           ax.set_xticks(arange(0, 1.2, 0.2))
           current_xticklabels = ax.get_xticks()
+          fixed_xticklabels = ["%.1f" % (round(current_label, 1)) for current_label in current_xticklabels]
           current_yticklabels = ax.get_yticks()
+          fixed_yticklabels = ["%.1f" % (round(current_label, 1)) for current_label in current_yticklabels]
+
+          ax.yaxis.set_major_locator(mticker.FixedLocator(list(current_yticklabels)))
+          ax.xaxis.set_major_locator(mticker.FixedLocator(list(current_xticklabels)))
+
           ax.set_xticklabels([], fontsize=tick_font_size)
-          ax.set_yticklabels(current_yticklabels, fontsize=tick_font_size)
+          ax.set_yticklabels(fixed_yticklabels, fontsize=tick_font_size)
 
           if i == n_subfigs -1:
-            ax.set_xticklabels(current_xticklabels, fontsize=tick_font_size, rotation=45)
+            ax.set_xticklabels(fixed_xticklabels, fontsize=tick_font_size, rotation=45)
 
           if i > 0:
             plt.tick_params(
             axis='both',
-            labelleft='off')
+            labelleft=False)
     
       else:
         plt.subplot(n_subfigs, n_subfigs, z)
         ax = plt.gca()
         current_xticklabels = ax.get_xticks()
-        ax.set_xticklabels(current_xticklabels, fontsize=tick_font_size)
+        fixed_xticklabels = ["%.1f" % (round(current_label, 1)) for current_label in current_xticklabels]
+
+        ax.yaxis.set_major_locator(mticker.FixedLocator(list(current_yticklabels)))
+        ax.xaxis.set_major_locator(mticker.FixedLocator(list(current_xticklabels)))
+        ax.set_xticklabels(fixed_xticklabels, fontsize=tick_font_size)
         
 
         if not args.use_pearson:
@@ -183,13 +204,13 @@ def main(args, tick_font_size, label_font_size):
         plt.tick_params(
         axis='both',
         which='both',
-        bottom='off',
-        top='off',
-        left='off',
-        right='off',
-        labelbottom='off',
-        labelleft='off',
-        labelright='off')
+        bottom=False,
+        top=False,
+        left=False,
+        right=False,
+        labelbottom=False,
+        labelleft=False,
+        labelright=False)
 
         ax.spines['top'].set_visible(False)
         ax.spines['right'].set_visible(False)
@@ -203,7 +224,9 @@ def main(args, tick_font_size, label_font_size):
     cb_label = 'correlation plot hexbin scale (log10)'
     cb = plt.colorbar(cax=cbar_ax, drawedges=False,
       ticks=range(args.hexbin_vmin, args.hexbin_vmax+1), label=cb_label)
-    current_yticklabels = cbar_ax.get_yticks()
+    #current_yticklabels = cbar_ax.get_yticks()
+    #fixed_yticklabels = ["%.1f" % (round(current_label, 1)) for current_label in current_yticklabels]
+
     cbar_ax.set_yticklabels(range(args.hexbin_vmin, args.hexbin_vmax+1), fontsize=tick_font_size)
     cbar_ax.set_ylabel(cb_label, fontsize=label_font_size)
     cb.outline.set_linewidth(1)
@@ -264,9 +287,9 @@ or oblique.")
     help="Show labels on axes", default=True)
   optional_arg_group.add_argument("--histogram_max", default=9000, type=int,
     help="Maximum value of y-axis of the matrix diagonal's histograms (default: %(default)s).")
-  optional_arg_group.add_argument("--hexbin_vmin", default=0, type=int,
+  optional_arg_group.add_argument("--hexbin_vmin", default=1, type=int,
     help="Minimum value of hexagonal bin counts (log10 scale) (default: %(default)s).")
-  optional_arg_group.add_argument("--hexbin_vmax", default=4, type=int,
+  optional_arg_group.add_argument("--hexbin_vmax", default=1000, type=int,
     help="Maximum value of hexagonal bin counts (log10 scale) (default: %(default)s).")
 
   logging_arg_group = parser.add_argument_group("logging options")
